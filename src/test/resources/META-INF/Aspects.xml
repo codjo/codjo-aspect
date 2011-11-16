@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspects>
+    <aspect>/net/codjo/aspect/ReportAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/ComputeAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/ErrorAspect.xml</aspect>
+</aspects>

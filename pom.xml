@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+     | POM Relationships
+     -->
+
+    <parent>
+        <groupId>net.codjo.pom</groupId>
+        <artifactId>codjo-pom-library</artifactId>
+        <version>SNAPSHOT</version>
+    </parent>
+    <groupId>net.codjo.aspect</groupId>
+    <artifactId>codjo-aspect</artifactId>
+    <version>2.10-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>net.codjo.xml</groupId>
+            <artifactId>codjo-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.variable</groupId>
+            <artifactId>codjo-variable</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.test</groupId>
+            <artifactId>codjo-test-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!--
+    | Project Information
+    -->
+
+    <name>Lib &gt; Aspect</name>
+    <description>Librairie pour ajouter des aspects avant ou apr�s l'ex�cution d'un traitement
+    </description>
+    <inceptionYear>2005</inceptionYear>
+
+    <!--
+    | Environment Information
+    -->
+
+    <scm>
+        <connection>scm:git:https://github.com/codjo/codjo-aspect.git</connection>
+        <developerConnection>scm:git:https://github.com/codjo/codjo-aspect.git</developerConnection>
+        <url>https://github.com/codjo/codjo-aspect</url>
+    </scm>
+
+</project>

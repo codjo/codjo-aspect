@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="SubSubAspectId" class="net.codjo.aspect.SubSubAspect">
+    <description>Aspect enfant 2</description>
+    <join-points>
+        <join-point call="before" point="aspect" argument="SubAspectId"/>
+    </join-points>
+</aspect>

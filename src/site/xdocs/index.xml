@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+
+    <properties>
+        <title>Librairie agf-aspect</title>
+    </properties>
+
+    <body>
+        <section name="Description">
+            <p>
+                Module pour ajouter des aspects avant ou après l'exécution d'un traitement.
+            </p>
+        </section>
+        <section name="Présentation">
+            <p>
+                Un aspect est composé :
+
+                <ol>
+                    <li>
+                        <b>d'un fichier de description XML dans lequel on spécifie :</b>
+                    </li>
+
+                    <ul>
+                        <li>son identifiant et sa classe associée</li>
+                        <li>son ou ses points de jointure, c'est à dire :
+                            la méthode d'appel (
+                            <code>before</code> ou
+                            <code>after</code>),
+                            le type de point et son identifiant
+                        </li>
+                    </ul>
+                    <p>Exemple :</p>
+                    <source><![CDATA[
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="MonAspectId" class="net.codjo.aspect.MonAspect">
+    <description>Description de mon aspect</description>
+    <join-points>
+        <join-point call="before" point="control.dispatch" argument="Q_AP_FUND_PRICE"/>
+        <join-point call="after" point="handler.execute" argument="newVL"/>
+    </join-points>
+</aspect>
+                    ]]>
+                    </source>
+
+                    <li>
+                        <b>d'une classe dans laquelle on définit son comportement</b>
+                    </li>
+                    <p>Exemple :</p>
+                    <source><![CDATA[
+public class MonAspect implements Aspect {
+
+    public void setUp(AspectContext context, JoinPoint joinPoint) {
+        // Méthode appelée avant le run. Elle permet de préparer l'exécution de
+        // l'aspect selon le point de jointure (ex : création des tables temporaires).
+        // Cette méthode est exécutée hors transaction.
+    }
+
+
+    public void run(AspectContext context) {
+        // Lance l'exécution de l'aspect.
+        // Cette méthode est exécutée en transaction.
+    }
+
+
+    public void cleanUp(AspectContext context) {
+        // Méthode appelée après le run. Elle permet de faire le ménage après
+        // l'exécution de l'aspect (ex : suppression des tables temporaires).
+        // Cette méthode est exécutée hors transaction.
+    }
+}
+                    ]]>
+                    </source>
+
+                    Il existe des
+                    <a href="helpers.html">classes utilitaires</a> qui permettent de simplifier l'implémentation des aspects.
+                </ol>
+            </p>
+            <p>
+                L'API necessite un fichier déclarant tous les aspects.
+
+                <ol>
+                    <li>
+                        <b>d'un fichier XML contenant l'ensemble des ressources à utiliser (aspects)</b>
+                        Par défaut le fichier doit se trouver dans le classpath à cet endroit
+                        <i>/META-INF/Aspects.xml</i>.
+                    </li>
+                    <p>Exemple :</p>
+                    <source><![CDATA[
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspects>
+    <aspect>/net.codjo/aspect/ReportAspect.xml</aspect>
+    <aspect>/net.codjo/aspect/ComputeAspect.xml</aspect>
+</aspects>
+                    ]]>
+                    </source>
+                </ol>
+            </p>
+        </section>
+        <section name="Aspect sur aspect">
+            <p>
+                Il est possible de définir un aspect sur un autre aspect. Ce point se nomme
+                <i>aspect</i> avec un id d'aspect comme argument. Exemple de configuration
+                d'un aspect :
+            </p>
+            <source><![CDATA[<join-point call="after" point="aspect" argument="MonAspectId"/>]]></source>
+            <p>
+                Le contexte d'aspect ne contient rien de spécifique relatif à ce point jonction.
+            </p>
+        </section>
+        <section name="Intégration">
+            <ol>
+                <li>Instancier la classe
+                    <code>AspectManager</code>.
+                </li>
+                <li>Charger tous les aspects nécessaires
+                    <ul>
+                        <li>
+                    soit par la méthode
+                            <b>load(InputStream inputStream)</b> (l'InputStream correspondant au fichier XML contenant les ressources à utiliser).
+                        </li>
+                        <li>
+                    soit par la méthode
+                            <b>addAspect(String aspectId, JoinPoint[] points, Class clazz)</b> (simulation du fichier xml décrivant un aspect).
+                        </li>
+                    </ul>
+                </li>
+                <li>Récupèration de l'aspect à exécuter avant ou après un traitement (méthodes
+                    <b>getBeforeAspect(String point, String argument)</b> et
+                    <b>getAfterAspect(String point, String argument)</b>.
+                </li>
+                <li>Exécution de ce ou ces aspects à l'aide des méthodes décrites ci-dessus.
+                </li>
+            </ol>
+        </section>
+    </body>
+</document>

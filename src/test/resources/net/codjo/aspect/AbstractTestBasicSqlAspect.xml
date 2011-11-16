@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="AbstractTestBasicSqlAspectId" class="net.codjo.aspect.AbstractTestBasicSqlAspect">
+    <description>Aspect sql</description>
+    <join-points>
+        <join-point call="before" point="handler.execute" argument="testSql"/>
+    </join-points>
+</aspect>

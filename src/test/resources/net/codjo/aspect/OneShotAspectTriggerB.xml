@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="OneShotAspectTriggerBId" class="net.codjo.aspect.OneShotAspectTriggerB">
+    <description>Aspect a appel unique : un evt declanche A et B, A et B declenche C</description>
+    <join-points>
+        <join-point call="before" point="handler.execute" argument="testONESHOTASPECT"/>
+    </join-points>
+</aspect>

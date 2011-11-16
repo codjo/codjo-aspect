@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="BadAspectId" class="net.codjo.aspect.BadAspect">
+    <!-- Ce fichier XML est intentionnellement mal formé -->
+    description>lorem ipsum</description>
+    <join-points>
+        <join-point call="before" point="control.dispatch" argument="Q_AP_FUND_PRICE"/>
+    </join-points>
+</aspect>

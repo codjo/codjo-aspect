@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="MainAspectId" class="net.codjo.aspect.MainAspect">
+    <description>Aspect parent</description>
+    <join-points>
+        <join-point call="before" point="control.dispatch" argument="Q_CASCADE"/>
+    </join-points>
+</aspect>

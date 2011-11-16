@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspects>
+    <aspect>/net/codjo/aspect/BadAspect.xml</aspect>
+</aspects>

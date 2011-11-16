@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+
+    <properties>
+        <title>Librairie agf-aspect</title>
+    </properties>
+
+    <body>
+        <section name="Description">
+            <p>
+                Ces classes permettent d'implémenter facilement l'interface
+                <b>Aspect</b>
+                .
+            </p>
+            <ul>
+                <li>
+                    <a href="#AbstractMultiCallAspect">AbstractMultiCallAspect</a>
+                </li>
+                <li>
+                    <a href="#AbstractBasicAspect">AbstractBasicAspect</a>
+                </li>
+                <li>
+                    <a href="#AbstractBasicSqlAspect">AbstractBasicSqlAspect</a>
+                </li>
+            </ul>
+        </section>
+        <section name="AbstractMultiCallAspect">
+            <subsection name="Description">
+                <p>
+                    Cette classe permet de gérer plusieurs déclenchements du même aspect. Il permet d'avoir à
+                    la fois un comportement de type oneShot (global) ainsi qu'un comportement spécifique par
+                    type de JoinPoint.
+                </p>
+            </subsection>
+            <subsection name="Utilisation">
+                <p>
+                    Au lieu d'implémenter les méthodes setUp(), run(), cleanUp(),
+                    il faut implémenter les méthodes getOneShotAspect() et getJoinPointAspect(JoinPoint).
+                </p>
+                <p>
+                    L'aspect retourné par getOneShotAspect() sera automatiquement déclenché
+                    qu'une seul fois. L'aspect retourné par getJoinPointAspect(JoinPoint) ne sera executé
+                    qu'une seul fois par point de déclenchement.
+                </p>
+                <p>
+                    <b>Avantages</b>
+                    <ul>
+                        <li>
+                            L'aspect 'getOneShotAspect()' contient le code commun. Par Exemple la création des
+                            tables temporaires, le calcul.
+                        </li>
+                        <li>
+                            Les aspects 'getJoinPointAspect(JoinPoint)' contiennent les parties spécifiques pour
+                            chaque point de déclenchement. Exemple remplissage des tables temporaires.
+                        </li>
+                    </ul>
+                </p>
+                <p>
+                    Exemple :
+                    <source> <![CDATA[
+public class MyMultiCallAspect extends AbstractMultiCallAspect {
+  protected Aspect getOneShotAspect() {
+    return new ComputeAspect();
+  }
+  protected Aspect getJoinPointAspect(JoinPoint point) {
+     if ("OstAdjustmentRateAspectId".equals(joinPoint.getArgument())) {
+       return new OstSpecificJoinPointAspect();
+     }
+     else if ("DividendAdjustmentRateAspectId".equals(joinPoint.getArgument())) {
+       return new DarSpecificPointAspect();
+     }
+     throw new AspectException("JoinPoint inconnu : " + joinPoint);
+  }
+} ]]>
+                    </source>
+                </p>
+            </subsection>
+        </section>
+        <section name="AbstractBasicAspect">
+            <subsection name="Description">
+                <p>
+                    Cette classe de base permet d'éviter que l'aspect qui en hérite soit déclenché plusieurs
+                    fois
+                    à la suite d'un seul et même événement. Par exemple, ceci peut se produire lorsqu'un
+                    événement
+                    provoque le déclenchement de deux aspects (A et B) qui eux-mêmes déclenchent un aspect C.
+                    Si aucune protection n'est mise en oeuvre, l'aspect C sera déclenché deux fois. Cette
+                    protection
+                    est paramétrable.
+                </p>
+                <p>
+                    De plus, cette classe permet d'afficher automatiquement des traces lors de l'appel des
+                    différentes
+                    méthodes de l'aspect.
+                </p>
+            </subsection>
+            <subsection name="Utilisation">
+                <p>
+                    Au lieu d'implémenter les méthodes setUp(), run(), cleanUp(),
+                    il faut implémenter les méthodes doSetUp(), doRun(), doCleanUp().
+                </p>
+                <p>
+                    Il faut implémenter la méthode isOneShotAspect() : si le mécanisme
+                    de protection contre les doubles appels doit être activé, elle doit
+                    retourner true, sinon false.
+                </p>
+                <p>
+                    Exemple :
+                    <source>
+                        import net.codjo.aspect.util.AbstractBasicAspect;
+
+                        public class MonAspect extends AbstractBasicAspect {
+                        protected void doSetUp(AspectContext context, JoinPoint joinPoint)
+                        throws AspectException {
+                        // Code normalement écrit dans setUp()
+                        }
+
+                        protected void doRun(AspectContext context) throws AspectException {
+                        // Code normalement écrit dans run()
+                        }
+
+                        protected void doCleanUp(AspectContext context)
+                        throws Exception {
+                        // Code normalement écrit dans cleanUp()
+                        }
+
+                        // Permet de dire que l'on ne passe qu'une fois dans un aspect par appel
+                        protected boolean isOneShotAspect() {
+                        return true;
+                        }
+                        }
+                    </source>
+                </p>
+            </subsection>
+        </section>
+        <section name="AbstractBasicSqlAspect">
+            <subsection name="Description">
+                <p>
+                    Cette classe permet de simplifier l'implémentation des aspects qui utilisent du SQL.
+                    Elle s'occupe de lancer des séries de requêtes ou d'appels à des procédures stockées
+                    lors des étapes des setup(), run() et cleanup().
+                    Elle prend en charge l'exécution des requêtes et traite correctement les exceptions.
+                    <br/>
+                    Les différentes requêtes à exécuter sont fournies par une implémentation de l'interface
+                    <code>SqlAspectBehaviour</code>
+                    .
+                    <br/>
+                    Les requête fournies sont exécutées
+                    par la méthode runSql(). Cette méthode reconnaît s'il s'agit d'une requête ou d'un appel
+                    de procédure stockée ( ex:
+                    <code>{call proc_name}</code>
+                    ).
+                    <br/>
+                    De plus, elle permet de paramétrer la requête SQL avec des variables provenant du contexte
+                    de l'aspect.
+                    Les variables en question sont encadrées par des '$'. Par exemple, dans la requête
+                    suivante :
+                    <br/>
+                    <code>
+                        insert into #TABLE_TEMP
+                        select * from $control.table$
+ where ERROR_TYPE &lt;= 0
+                    </code>
+                    <br/>
+                    runSql va changer
+                    <code>$control.table$</code>
+                    par la valeur dans le contexte qui a pour clef
+                    <code>control.table</code>
+                    .
+                    <br/>
+                    De plus l'utilisateur peut ajouter des mécanismes plus complexes en Java en implémentant
+                    les méthodes doSetUp(),
+                    doRunBeforeSql(), doRunAfterSql() et doCleanUp(), dans lesquelles il peut faire appel à
+                    lui-même à runSql() (méthode protected).
+                    <br/>
+                </p>
+                <p>
+                    L'ordre d'appel des différentes méthodes est :
+                    <ol>
+                        <li>SqlAspectBehaviour.getSqlForSetUp() (Hors transaction)</li>
+                        <li>doSetup() (Hors transaction)</li>
+                        <li>doRunBeforeSql() (En transaction)</li>
+                        <li>SqlAspectBehaviour.getSqlCallForRun() (En transaction)</li>
+                        <li>doRunAfterSql() (En transaction)</li>
+                        <li>doCleanup() (Hors transaction)</li>
+                        <li>SqlAspectBehaviour.getSqlForCleanUp() (Hors transaction)</li>
+                    </ol>
+                </p>
+                <p>
+                    DefaultSqlAspectBehaviour est l'implémentation de base de SqlAspectBehaviour. Elle
+                    supporte la création et la destruction des tables temporaires. Pour ce faire, tel qu'il
+                    est montré dans l'exemple
+                    ci-dessous, on transmet les tables temporaires à la fonction setTemporaryTables par le
+                    biais d'un tableau d'objets Table. Un objet table est spécifié par son
+                    nom et la description des colonnes dans le constructeur.
+                    <br/>
+                    DefaultSqlAspectBehaviour supporte aussi les fonction de base de SqlAspectBehaviour,
+                    c'est-à-dire la spécification des requêtes à exécuter
+                    au setup, cleanup et run.
+                    <br/>
+                    Lorsque DefaultSqlAspectBehaviour répond à getSqlForSetUp(), elle renvoie d'abord les
+                    scripts de table puis les requêtes précedemment spécifiées par
+                    setSqlForSetUp().
+                    <br/>
+                    Lorsque DefaultSqlAspectBehaviour répond à getSqlCallForRun(), elle renvoie les requêtes
+                    précedemment spécifiées par
+                    setSqlForRun().
+                    <br/>
+                    Lorsque DefaultSqlAspectBehaviour répond à getSqlForCleanUp(), elle renvoie d'abord les
+                    requêtes précedemment spécifiées par
+                    setSqlForCleanUp() puis les scripts de destruction des tables.
+                    <br/>
+                    Les fonctions setSqlForRun(), setSqlForSetUp() et setSqlForCleanUp() reçoivent en
+                    paramètre un tableau de String (String[]). Les requêtes
+                    seront exécutées dans l'ordre du tableau.
+                </p>
+            </subsection>
+            <subsection name="Utilisation">
+                <p>
+                    Exemple :
+                    <source>
+                        import net.codjo.aspect.util.sql.AbstractBasicSqlAspect;
+
+                        public class MonAspect extends AbstractBasicSqlAspect {
+                        private static final DefaultSqlAspectBehaviour sqlAspectBehaviour;
+
+                        static {
+                        // DefaultSqlAspectBehaviour est une classe concrète qui permet de générer
+                        // les scripts de création et destruction des tables temporaires.
+                        sqlAspectBehaviour = new DefaultSqlAspectBehaviour();
+
+                        sqlAspectBehaviour.setTemporaryTables(new Table[] {
+                        new Table("#SEL_OST",
+                        " PORTFOLIO_BRANCH varchar(22) null,"
+                        + " SECURITY_EVENT_DATE datetime null,"
+                        + " EXCHANGE_RATE numeric(15,5) null"),
+                        new Table("#SEL_DAR",
+                        " PORTFOLIO_BRANCH varchar(22) null,"
+                        + " DIVIDEND_DATE datetime null,"
+                        + " EXCHANGE_RATE numeric(15,5) null")
+                        });
+
+                        sqlAspectBehaviour.setSqlForRun(new String[] {
+                        " update AP_FUND_PRICE"
+                        + " set AP_FUND_PRICE.OST_ADJUSTMENT_RATE = #SEL_OST.EXCHANGE_RATE"
+                        + " from AP_FUND_PRICE "
+                        + " inner join #SEL_OST "
+                        + " on AP_FUND_PRICE.PORTFOLIO_BRANCH = #SEL_OST.PORTFOLIO_BRANCH"
+                        + " and AP_FUND_PRICE.VALUATION_DATE = #SEL_OST.SECURITY_EVENT_DATE"
+                        });
+                        }
+
+                        protected SqlAspectBehaviour getSqlBehaviour() {
+                        return sqlAspectBehaviour;
+                        }
+
+                        protected boolean isOneShotAspect() {
+                        return true;
+                        }
+
+                        protected void doSetUp(AspectContext context, JoinPoint joinPoint, Connection con)
+                        throws AspectException, SQLException {
+                        // Mettre ici du code à exécuter après les requêtes automatiques
+                        // provenant de SqlAspectBehaviour.getSqlForSetUp()
+                        }
+
+                        protected void doRunBeforeSql(AspectContext context, Connection con)
+                        throws AspectException, SQLException {
+                        // Mettre ici du code à exécuter avant les requêtes automatiques
+                        // provenant de SqlAspectBehaviour.getSqlCallForRun()
+                        }
+
+                        protected void doRunAfterSql(AspectContext context, Connection con)
+                        throws AspectException, SQLException {
+                        // Mettre ici du code à exécuter après les requêtes automatiques
+                        // provenant de SqlAspectBehaviour.getSqlCallForRun()
+                        }
+
+                        protected void doCleanUp(AspectContext context, Connection con)
+                        throws AspectException, SQLException {
+                        // Mettre ici du code à exécuter avant les requêtes automatiques
+                        // provenant de SqlAspectBehaviour.getSqlForCleanUp()
+                        }
+                    </source>
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>

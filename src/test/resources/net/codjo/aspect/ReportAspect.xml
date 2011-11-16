@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="ReportAspectId" class="net.codjo.aspect.ReportAspect">
+    <description>lorem ipsum</description>
+    <join-points>
+        <join-point call="before" point="control.dispatch" argument="Q_AP_FUND_PRICE"/>
+        <join-point call="before" point="control.dispatch"/>
+        <join-point call="after" point="handler.execute" argument="newVL" isFork="true"/>
+        <join-point call="before" point="handler.execute" argument="newVL" isFork="false"/>
+        <join-point call="before" point="multipoint" argument="Q_AP_OUTSTAND"/>
+    </join-points>
+</aspect>

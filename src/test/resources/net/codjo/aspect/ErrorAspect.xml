@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="ErrorAspectId" class="net.codjo.aspect.ErrorAspect">
+    <description>lorem ipsum</description>
+    <join-points>
+        <join-point call="error" point="control.dispatch" argument="Q_AP_FUND_PRICE"/>
+    </join-points>
+</aspect>

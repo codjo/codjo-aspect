@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="ComputeAspectId" class="net.codjo.aspect.ComputeAspect">
+    <description>lorem ipsum</description>
+    <join-points>
+        <join-point call="after" point="control.dispatch" argument="Q_AP_FUND_PRICE"/>
+        <join-point call="before" point="control.dispatch" argument="Q_AP_IDEE"/>
+        <join-point call="after" point="securityReports"/>
+        <join-point call="before" point="multipoint" argument="Q_AP_OUTSTAND"/>
+        <join-point call="after" point="with.error" argument="TOTO"/>
+        <join-point call="error" point="with.error" argument="TOTO"/>
+        <join-point call="error" point="handler.execute" argument="deleteCarambar"/>
+        <join-point call="before" point="aspect" argument="ReportAspectId" />
+    </join-points>
+</aspect>

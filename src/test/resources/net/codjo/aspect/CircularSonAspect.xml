@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="CircularSonAspectId" class="net.codjo.aspect.CircularSonAspect">
+    <description>Aspect circulaire enfant 1</description>
+    <join-points>
+        <join-point call="after" point="aspect" argument="CircularMiddleAspectId"/>
+    </join-points>
+</aspect>

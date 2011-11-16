@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspect id="CircularParentAspectId" class="net.codjo.aspect.CircularParentAspect">
+    <description>Aspect circulaire parent 1</description>
+    <join-points>
+        <join-point call="before" point="handler.execute" argument="testCircular"/>
+        <join-point call="after" point="aspect" argument="CircularSonAspectId"/>
+    </join-points>
+</aspect>

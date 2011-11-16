@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<aspects>
+    <aspect>/net/codjo/aspect/ReportAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/ComputeAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/ErrorAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/MainAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/SubAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/SubSecondAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/SubSubAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/CircularParentAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/CircularMiddleAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/CircularSonAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/OneShotAspect.xml</aspect>
+    <aspect>/net/codjo/aspect/OneShotAspectTriggerA.xml</aspect>
+    <aspect>/net/codjo/aspect/OneShotAspectTriggerB.xml</aspect>
+    <aspect>/net/codjo/aspect/AbstractTestBasicSqlAspect.xml</aspect>
+</aspects>

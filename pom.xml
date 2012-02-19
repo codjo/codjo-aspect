@@ -8,7 +8,7 @@
 
     <parent>
         <groupId>net.codjo.pom</groupId>
-        <artifactId>codjo-pom-library</artifactId>
+        <artifactId>codjo-pom-external</artifactId>
         <version>SNAPSHOT</version>
     </parent>
     <groupId>net.codjo.aspect</groupId>
@@ -43,8 +43,7 @@
     -->
 
     <name>Lib &gt; Aspect</name>
-    <description>Librairie pour ajouter des aspects avant ou apr�s l'ex�cution d'un traitement
-    </description>
+    <description>Library used for adding or removing aspect before or after a specific treatment.</description>
     <inceptionYear>2005</inceptionYear>
 
     <!--

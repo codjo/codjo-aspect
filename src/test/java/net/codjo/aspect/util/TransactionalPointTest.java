@@ -4,29 +4,29 @@
  * Copyright (c) 2001 AGF Asset Management.
  */
 package net.codjo.aspect.util;
+import java.sql.SQLException;
 import net.codjo.aspect.Aspect;
 import net.codjo.aspect.AspectContext;
 import net.codjo.aspect.AspectException;
 import net.codjo.aspect.AspectManager;
 import net.codjo.aspect.JoinPoint;
-import java.sql.Connection;
-import java.sql.SQLException;
+import net.codjo.test.common.LogString;
+import net.codjo.test.common.mock.ConnectionMock;
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class TransactionalPointTest {
     private static final String POINT_ID = "pointId";
     private static final String CURRENT_ARG = "currentArgument";
     private static MyTransactionalManager txManager;
     private static StringBuffer globalExecuteList;
+    private static final String LOG_STRING = "LogString";
+    private LogString log = new LogString();
     private TransactionalPoint transactionalPoint;
     private AspectContext aspectContext;
-    private MockConnection con;
+    private ConnectionMock con;
     private AspectManager manager;
     private MyPointRunner myPointRunner;
 
@@ -37,10 +37,11 @@ public class TransactionalPointTest {
 
         txManager = new MyTransactionalManager();
         aspectContext = new AspectContext();
-        con = new MockConnection();
+        con = new ConnectionMock(new LogString("connection", log));
 
         aspectContext.put(TransactionalPoint.CONNECTION, con);
         aspectContext.put(TransactionalPoint.ARGUMENT, CURRENT_ARG);
+        aspectContext.put(LOG_STRING, log);
 
         manager = new AspectManager();
         transactionalPoint = new TransactionalPoint(POINT_ID, manager);
@@ -192,7 +193,7 @@ public class TransactionalPointTest {
         }
 
         assertEquals("setUp, end", FakeBeforeAspect.executeList.toString());
-        assertEquals("Rien n'est pas appelé sur la connection", "", con.getExecuteList());
+        assertEquals("Rien n'est pas appelé sur la connection", "", log.getContent());
     }
 
 
@@ -223,9 +224,7 @@ public class TransactionalPointTest {
 
         assertEquals("setUp, run, end", FakeBeforeAspect.executeList.toString());
         assertEquals("setUp, run, end", FakeErrorAspect.executeList.toString());
-        assertEquals(
-              " CO setAutoCommit(false),  CO rollback,  CO setAutoCommit(true),  CO setAutoCommit(true)",
-              con.getExecuteList());
+        log.assertContent("connection.setAutoCommit(false), connection.rollback(), connection.setAutoCommit(true), connection.setAutoCommit(true)");
     }
 
 
@@ -244,7 +243,7 @@ public class TransactionalPointTest {
 
         // Appel
         FakeBeforeAspect.failInRun = true;
-        con = new MockConnection() {
+        con = new ConnectionMock(new LogString("connection", log)) {
             @Override
             public void rollback() throws SQLException {
                 super.rollback();
@@ -262,8 +261,7 @@ public class TransactionalPointTest {
         }
 
         assertEquals("setUp, run, end", FakeBeforeAspect.executeList.toString());
-        assertEquals(" CO setAutoCommit(false),  CO rollback,  CO setAutoCommit(true)",
-                     con.getExecuteList());
+        log.assertContent("connection.setAutoCommit(false), connection.rollback(), connection.setAutoCommit(true)");
     }
 
 
@@ -316,13 +314,13 @@ public class TransactionalPointTest {
 
 
         private boolean isInTx(AspectContext context) {
-            Connection con = (Connection)context.get(TransactionalPoint.CONNECTION);
-            boolean autoCommit = false;
-            try {
-                autoCommit = con.getAutoCommit();
-            }
-            catch (SQLException e) {
-                //
+            LogString log = (LogString)context.get(LOG_STRING);
+            String content = log.getContent();
+            int auto = content.lastIndexOf("setAutoCommit(true)");
+            int notAuto = content.lastIndexOf("setAutoCommit(false)");
+            boolean autoCommit = true;
+            if (notAuto > auto) {
+                autoCommit = false;
             }
             return !autoCommit;
         }

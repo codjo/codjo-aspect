@@ -39,7 +39,7 @@ public class TransactionalPointTest {
         aspectContext = new AspectContext();
         con = new ConnectionMock(new LogString("connection", log));
 
-        aspectContext.put(TransactionalPoint.CONNECTION, con);
+        aspectContext.put(TransactionalPoint.CONNECTION, con.getStub());
         aspectContext.put(TransactionalPoint.ARGUMENT, CURRENT_ARG);
         aspectContext.put(LOG_STRING, log);
 
@@ -250,7 +250,7 @@ public class TransactionalPointTest {
                 throw new SQLException("Erreur rollback");
             }
         };
-        aspectContext.put(TransactionalPoint.CONNECTION, con);
+        aspectContext.put(TransactionalPoint.CONNECTION, con.getStub());
 
         try {
             transactionalPoint.run(aspectContext, myPointRunner);

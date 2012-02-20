@@ -4,9 +4,11 @@
  * Copyright (c) 2001 AGF Asset Management.
  */
 package net.codjo.aspect;
-import net.codjo.aspect.util.MockConnection;
-import net.codjo.aspect.util.TransactionalPoint;
 import junit.framework.TestCase;
+import net.codjo.aspect.util.TransactionalPoint;
+import net.codjo.test.common.LogString;
+import net.codjo.test.common.mock.CallableStatementMock;
+import net.codjo.test.common.mock.ConnectionMock;
 /**
  * Test de {@link AbstractTestBasicSqlAspect}
  *
@@ -14,15 +16,16 @@ import junit.framework.TestCase;
  */
 public class BasicSqlAspectTest extends TestCase {
     private AspectManager manager;
+    private LogString log = new LogString();
 
 
     private AspectContext launchAspect(Aspect aspect)
           throws AspectException {
         AspectContext context = new AspectContext();
         StringBuffer sb = new StringBuffer();
-        context.put(AbstractTestBasicSqlAspect.CALL_HISTORY, sb);
-        MockConnection connection = new MockConnection();
-        connection.setStringBuffer(sb);
+        context.put(AbstractTestBasicSqlAspect.CALL_HISTORY, log);
+        ConnectionMock connection = new ConnectionMock(new LogString("connection", log));
+        connection.mockCreateStatement(new CallableStatementMock(log));
         context.put("control.table", "#TABLE_TEST");
         context.put(TransactionalPoint.CONNECTION, connection);
         aspect.setUp(context, null);
@@ -32,19 +35,26 @@ public class BasicSqlAspectTest extends TestCase {
     }
 
 
-    private void assertHistory(AspectContext context, String expected) {
-        assertEquals(expected,
-                     context.get(AbstractTestBasicSqlAspect.CALL_HISTORY).toString());
-    }
-
-
     public void test_getBeforeAspect_compute() throws Exception {
         load();
         Aspect aspect = manager.getBeforeAspect("handler.execute", "testSql");
 
-        AspectContext context = launchAspect(aspect);
-        assertHistory(context,
-                      " CO  create statement ,  ST  execute update {create table A (id int)} ,  ST  close ,  CO  create statement ,  ST  execute update {create table B (id int)} ,  ST  close ,  CO  create statement ,  ST  execute update {select * from #TABLE_TEST} ,  ST  close net.codjo.aspect.AbstractTestBasicSqlAspect. doSetUp () net.codjo.aspect.AbstractTestBasicSqlAspect. run before Sql () ,  CO  prepare call : {{call sp_test}} ,  execute update net.codjo.aspect.AbstractTestBasicSqlAspect. run after Sql () net.codjo.aspect.AbstractTestBasicSqlAspect. doCleanUp () ,  CO  create statement ,  ST  execute update {drop table A} ,  ST  close ,  CO  create statement ,  ST  execute update {drop table B} ,  ST  close ");
+        launchAspect(aspect);
+
+        log.assertContent("connection.createStatement(), statement.executeUpdate(create table A (id int)), statement.close()"
+                          + ", connection.createStatement(), statement.executeUpdate(create table B (id int)), statement.close()"
+                          + ", connection.createStatement(), statement.executeUpdate(select * from #TABLE_TEST), statement.close()"
+
+                          + ", net.codjo.aspect.AbstractTestBasicSqlAspect. doSetUp ()"
+
+                          + ", net.codjo.aspect.AbstractTestBasicSqlAspect. run before Sql ()"
+                          + ", connection.prepareCall({call sp_test}), statement.executeUpdate(), statement.close()"
+                          + ", net.codjo.aspect.AbstractTestBasicSqlAspect. run after Sql ()"
+
+                          + ", net.codjo.aspect.AbstractTestBasicSqlAspect. doCleanUp ()"
+
+                          + ", connection.createStatement(), statement.executeUpdate(drop table A), statement.close()"
+                          + ", connection.createStatement(), statement.executeUpdate(drop table B), statement.close()");
     }
 
 
